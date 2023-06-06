@@ -1,10 +1,10 @@
-%--------------semivarigoram-----------------
+%%--------------Semivariograms-----------------
 %%
-DataPath=sprintf('%s','E:\footprint_all\analysis\footprint');
+DataPath=sprintf('%s','E:\footprint\FPresults\');
 cd(DataPath)
 datadir=dir('*.mat');
 
-NDVIpath = 'E:\footprint_all\analysis\NDVI\';
+NDVIpath = 'E:\footprint\NDVI\';
 
 %%
 for i = 1:length(datadir)
@@ -32,7 +32,7 @@ for i = 1:length(datadir)
 
     [Cd,hd] = contour(x_l,y_l,filtfilt(fir1(20,1e-2,'low'),1,cumufp),[90 90],'k','LineWidth',2);
    
-    % 90% footprint range
+    % 90% footprint
     Cd1 = Cd(:,2:end);
     xmax = max(Cd1(1,:));
     xmin = min(Cd1(1,:));
@@ -46,11 +46,11 @@ for i = 1:length(datadir)
     fprows = ymin_ind - ymax_ind;
     fpcols = xmax_ind - xmin_ind;
 
-    % NDVI of 90% footprint range
-    filename = strcat(RTSiteID,'.tif')
+  
+    filename = strcat(RTSiteID(1:6),'.tif')
 
     cd(NDVIpath)
-    NDVI=imread(filename);  
+    NDVI=imread(filename);  %NDVI
     [NDVI_row NDVI_col] = size(NDVI);
     if mod(NDVI_row,2)==0
         row_center = NDVI_row/2;
@@ -62,10 +62,10 @@ for i = 1:length(datadir)
     else
         col_center = (NDVI_col+1)/2;
     end 
-    a=fix(row_center-fprows/2*3);
-    b=fix(row_center+fprows/2*3);
-    c=fix(col_center-fpcols/2*3);
-    d=fix(col_center+fpcols/2*3);
+    a=fix(row_center-fprows/2);
+    b=fix(row_center+fprows/2);
+    c=fix(col_center-fpcols/2);
+    d=fix(col_center+fpcols/2);
 
     Picolor = NDVI(a:b,c:d);
 
@@ -74,23 +74,28 @@ for i = 1:length(datadir)
     mean_n=mean(Picolor,1); 
     temp=0; 
     max_h=fix(min(m,n)*0.35); 
-
-    % East-West
+	
+	
     sum_h=0; 
-    rh_h=ones(1,max_h); 
+    Nh_h=0; 
+    rh_h=ones(1,max_h);
     clear h;
     for h = 1:1:max_h   
         for i = 1:1:m    
             for j =1:1:n-h     
                 temp=power((Picolor(i,j)-Picolor(i,j+h)),2); 
-                sum_h=sum_h+temp;  
-                Nh_h=Nh_h+1;  
+                if isnan(temp)
+                    continue
+                else
+                    sum_h=sum_h+temp;  
+                    Nh_h=Nh_h+1;
+                end
             end
         end
         rh_h(1,h)=sum_h/(Nh_h*2); 
     end
 
-    % North-South
+    
     sum_v=0; 
     Nh_v=0;  
     rh_v=ones(1,max_h); 
@@ -98,14 +103,19 @@ for i = 1:length(datadir)
         for j = 1:1:n    
             for i =1:1:m-h     
                 temp=power((Picolor(i,j)-Picolor(i+h,j)),2); 
-                sum_v=sum_v+temp;  
-                Nh_v=Nh_v+1; 
+                if isnan(temp)
+                    continue
+                else
+                    sum_v=sum_v+temp;  
+                    Nh_v=Nh_v+1;
+                end
+                
             end
         end
         rh_v(1,h)=sum_v/(Nh_v*2); 
     end
 
-    % Northwest-southeast
+ 
     sum_s=0; 
     Nh_s=0; 
     rh_s=ones(1,max_h); 
@@ -113,23 +123,31 @@ for i = 1:length(datadir)
         for i=1:1:m-h 
             for j=1:1:n-h
                 temp=power((Picolor(i,j)-Picolor(i+h,j+h)),2);
-                sum_s=sum_s+temp;
-                Nh_s=Nh_s+1;
+                if isnan(temp)
+                    continue
+                else
+                    sum_s=sum_s+temp;
+                    Nh_s=Nh_s+1;
+                end
             end
         end
         rh_s(1,h)=sum_s/(Nh_s*2);
     end
 
-    % Northeast-Southwest
-    sum_t=0; 
+ 
+    sum_t=0;
     Nh_t=0; 
     rh_t=ones(1,max_h); 
     for h=1:1:max_h
         for i=1:1:m-h
             for j=n:-1:1+h
                 temp=power((Picolor(i,j)-Picolor(i+h,j-h)),2);
-                sum_t=sum_t+temp;
-                Nh_t=Nh_t+1;
+                if isnan(temp)
+                    continue
+                else
+                    sum_t=sum_t+temp;
+                    Nh_t=Nh_t+1;
+                end
             end
         end
         rh_t(1,h)=sum_t/(Nh_t*2);
@@ -138,13 +156,11 @@ for i = 1:length(datadir)
     x_0_90=[1:max_h];
     x_45_135=[sqrt(2):sqrt(2):max_h*sqrt(2)];
     semivar_0_90=[x_0_90; rh_h ;rh_v];
-    semivar_45_135=[x_45_135; rh_t; rh_s];
+    semivar_45_135=[x_45_135; rh_t; rh_s]; 
     data = [semivar_0_90; semivar_45_135];
-    omni_semivar = mean(data([2 3 5 6],:),1);
+    omni_semivar = mean(data([2 3 5 6],:),1); 
     data = [data;omni_semivar];
-    xlswrite(strcat('E:\footprint_all\analysis\semivariance\',RTSiteID,'.xls'),data);
-    clear rh_t;
+    xlswrite(strcat('E:\footprint\semivar\',RTSiteID,'.xls'),data);
+    clear rh_h rh_v rh_t rh_s;
 
-
-   
 end

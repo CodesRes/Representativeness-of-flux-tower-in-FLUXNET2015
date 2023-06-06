@@ -1,3 +1,4 @@
+
 function s = FpAreaStats(yrphi);
 
 
@@ -19,7 +20,7 @@ cumu_yrphi = footcumsort(yrphi)*100;
 
 [B,TransferF] = footprint_rotate(x_x,y_y,x_x,0);
 
-%% plot
+
 x_l = linspace(-pix*(TransferF.Bx+TransferF.x_offset),pix*(TransferF.Bx+TransferF.x_offset),m2);
 x_l = x_l(ones(1,n2),:);
 y_l = linspace(pix*(TransferF.By+TransferF.y_offset),-pix*(TransferF.By+TransferF.y_offset),n2)';
@@ -38,7 +39,7 @@ xlabel('Distance from tower W-E (m)');
 text(3100, -3100,'log(\phi)','FontSize',16);
 hold off;
 
-%% statistic footprint area of 50 70 90 99% 
+%% footprint 50 70 90 99% 
 
 xx1 = Cd1(1,1:end);
 yy1 = Cd1(2,1:end);

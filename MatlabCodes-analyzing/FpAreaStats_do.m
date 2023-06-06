@@ -1,4 +1,4 @@
-path = 'E:\footprint_all\analysis\footprint\'; 
+path = 'E:\footprint\FPresults\'; 
 suffix = '*.mat';
 file_list = dir(strcat(path,suffix));
 area=[];
@@ -8,6 +8,6 @@ for i =1:length(file_list)
     data = strcat(path,file);
     load (data);
     s = FpAreaStats(yrphi);
-    area = [area s'];
+    area = [area s'];  % area of 50,70,90,99% ACFC
     names = [names,' ', file];
 end 

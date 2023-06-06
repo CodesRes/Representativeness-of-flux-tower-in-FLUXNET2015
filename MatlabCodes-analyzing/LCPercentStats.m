@@ -1,6 +1,6 @@
 path = 'E:\footprint_all\analysis\LCoverStats\data\';
 file_list = dir(path);
-result = zeros(196,18);
+result = zeros(199,18);
 for i=3:length(file_list)
     name = strcat(path,file_list(i).name);
     name

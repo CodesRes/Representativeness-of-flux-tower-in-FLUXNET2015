@@ -1,20 +1,21 @@
-% ============NDVIwindow size analysis==============
-DataPath=sprintf('%s','E:\footprint_all\analysis\footprint\');
+%% Average NDVI of windowsizes
+DataPath=sprintf('%s','E:\footprint\FPresults\');
 cd(DataPath)
 datadir=dir('*.mat');
 
-NDVIpath = 'E:\footprint_all\analysis\NDVI\';
+NDVIpath = 'E:\footprint\NDVI\';
+
 %%
 meanNDVIallsites = [];
 for i = 1:length(datadir)
     DataName=datadir(i).name;
     RTSiteID=DataName(1:end-4);
     cd(NDVIpath)
-    filename = strcat(RTSiteID,'.tif');
-    NDVI=imread(filename);  
+    filename = strcat(RTSiteID(1:6),'.tif');
+    NDVI=imread(filename);  %NDVI
     [NDVI_row NDVI_col] = size(NDVI);
 
-    % NDVI center location
+     
     if mod(NDVI_row,2)==0
         row_center = NDVI_row/2;
     else
@@ -26,26 +27,16 @@ for i = 1:length(datadir)
         col_center = (NDVI_col+1)/2;
     end 
 
-    %% NDVI range of window size
+    
     meanNDVI=[];
-    for j = 1:3:148
-      
-        NDVIj = NDVI(row_center-j:row_center+j,col_center-j:col_center+j); 
-        mean = mean2(NDVIj);
+    for j = 0:1:49
+%         
+        NDVIj = NDVI(row_center-j:row_center+j,col_center-j:col_center+j); % window size:30,90,150....2970m
+        mean = nanmean(nanmean(NDVIj));
         meanNDVI = [meanNDVI ; mean];
     end 
     meanNDVIallsites = [meanNDVIallsites meanNDVI];
 end 
 
 %% save to xls
-xlswrite('E:\footprint_all\analysis\WindowSize\meanNDVI.xls',meanNDVIallsites)
-
-data = xlsread('E:\footprint_all\analysis\WindowSize\meanNDVI.xls')
-for k=1:196
-    plot(data(:,1),data(:,k+1));
-    hold on
-end 
-xlabel('Window width (m)');
-ylabel('NDVI')
-print('-djpeg', 'E:\footprint_all\analysis\WindowSize\meanNDVI')
-
+xlswrite('E:\footprint\WindowSize\meanNDVI.xls',meanNDVIallsites)
